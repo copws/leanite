@@ -9,14 +9,14 @@
 
 - React.js & React DOM
 - React Router
-- **UI：**Ant Design
-- **LeanCloud：**leancloud-storage
+- UI：Ant Design
+- LeanCloud：leancloud-storage
 - pubsub-js
 - js-md5
 
 Markdown 有关：
 
-- **Markdown 编辑器：**for-editor
+- Markdown 编辑器：for-editor
 - Marked & highlight.js
 
 同时感谢 for-editor 的 Markdown 文本渲染源码！（真的不会写……）
