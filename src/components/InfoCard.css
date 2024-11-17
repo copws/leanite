@@ -1,4 +1,4 @@
 p {
   word-wrap: break-word;
-  width: calc(50vh-40px);
+  width: calc(50vw-40px);
 }
