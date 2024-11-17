@@ -15,7 +15,12 @@ export default function Home() {
       JSON.parse(localStorage.getItem("blogMeta") as string) as any[]
     );
     (async () => {
-      setResponses(await new AV.Query("BlogContent").limit(5).find());
+      setResponses(
+        await new AV.Query("BlogContent")
+          .descending("createdAt")
+          .limit(5)
+          .find()
+      );
     })();
   }, []);
 
@@ -54,12 +59,17 @@ export default function Home() {
             <Space style={{ color: "grey" }}>
               阅读量：{metaNow.reader - 1}
               <Divider type="vertical" />
+              发布：
+              {new Date(metaNow.createdAt).toLocaleDateString()}
+              <Divider type="vertical" />
               标签：
-              {metaNow?.tags.map((tag) => (
-                <Tag>
-                  <Link to={"/leanite/tag?name=" + tag}>{tag}</Link>
-                </Tag>
-              ))}
+              {metaNow?.tags.length > 0
+                ? metaNow.tags.map((tag) => (
+                    <Tag>
+                      <Link to={"/leanite/tag?name=" + tag}>{tag}</Link>
+                    </Tag>
+                  ))
+                : "无"}
             </Space>
             {MDParse(q.get("content"))}
           </InfoCard>
