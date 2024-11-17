@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/leanite/static/css/main.12c1d2bb.css",
+    "main.css": "/leanite/static/css/main.0db5a5ac.css",
     "main.js": "/leanite/static/js/main.3ab7ba4d.js",
     "index.html": "/leanite/index.html",
-    "main.12c1d2bb.css.map": "/leanite/static/css/main.12c1d2bb.css.map",
+    "main.0db5a5ac.css.map": "/leanite/static/css/main.0db5a5ac.css.map",
     "main.3ab7ba4d.js.map": "/leanite/static/js/main.3ab7ba4d.js.map"
   },
   "entrypoints": [
-    "static/css/main.12c1d2bb.css",
+    "static/css/main.0db5a5ac.css",
     "static/js/main.3ab7ba4d.js"
   ]
 }
