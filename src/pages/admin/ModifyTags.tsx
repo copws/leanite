@@ -1,4 +1,4 @@
-import React, { useEffect, useState, MouseEvent } from "react";
+import React, { useEffect, useState, type MouseEvent } from "react";
 import {
   message,
   List,
@@ -12,8 +12,7 @@ import {
 import { subscribe, publish, unsubscribe } from "pubsub-js";
 import InfoCard from "../../components/InfoCard";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { blank, BlogMeta, Tag } from "../../lib";
-import { md5 } from "js-md5";
+import { type BlogMeta, type Tag } from "../../lib";
 
 let verified = false;
 export default function ModifyTags() {

@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button, Input, List, message, Popconfirm, Space } from "antd";
 import { subscribe, publish, unsubscribe } from "pubsub-js";
-import { Tag, BlogMeta, q2o } from "../../lib";
+import { type Tag, type BlogMeta, q2o } from "../../lib";
 import InfoCard from "../../components/InfoCard";
-import MdEditor from "for-editor";
+import { MdEditor } from "md-editor-rt";
 import AV from "leancloud-storage";
 import { md5 } from "js-md5";
+import "md-editor-rt/lib/style.css";
 
 let verified = false;
 export default function ModifyArticle() {
@@ -160,11 +161,8 @@ export default function ModifyArticle() {
               setEditValue(e);
             }}
             style={{
-              boxShadow: "0 0 40px 0px rgba(0,0,0,0.04)",
-              width: "100%",
-              marginTop: "30px",
-              borderRadius: "7px",
-              border: "none",
+              marginTop:"30px",
+              border: 0
             }}
           />
         </>
@@ -187,7 +185,9 @@ export default function ModifyArticle() {
                   content.set("title", "");
                   console.log(content);
                   setCurrentContent(content);
-                  navigate("/leanite/modifyArticle?id=" + content.get("id") + "&new=1");
+                  navigate(
+                    "/leanite/modifyArticle?id=" + content.get("id") + "&new=1"
+                  );
                 }}
                 type="primary"
                 style={{ float: "right" }}
@@ -244,7 +244,9 @@ export default function ModifyArticle() {
                     </Popconfirm>,
                   ]}
                 >
-                  <Link to={"/leanite/article?id=" + meta.id}>{meta.title}</Link>
+                  <Link to={"/leanite/article?id=" + meta.id}>
+                    {meta.title}
+                  </Link>
                 </List.Item>
               );
             }}

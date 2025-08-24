@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InfoCard from "../../components/InfoCard";
 import AV from "leancloud-storage";
-import { Tag, BlogMeta, arrEqual } from "../../lib";
+import { type Tag, type BlogMeta, arrEqual } from "../../lib";
 
 let verified = false;
 export default function AdminHome() {

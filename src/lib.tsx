@@ -1,7 +1,8 @@
 import { message } from "antd";
 import AV from "leancloud-storage";
-import marked from "./marked";
 
+// LeanCloud 初始化的代码
+// 年久失修
 export function init() {
   const done = new AV.Object("Init");
   const leaniteInfo = new AV.Object("LeaniteInfo");
@@ -38,21 +39,14 @@ export function init() {
   );
 }
 
-export function MDParse(str: string | null) {
-  if (str) {
-    return (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: marked(str) as string,
-        }}
-      />
-    );
-  }
-}
-
+// LeanCloud 传回来的数据是 AV.Queriable，同时应对 AV.Object 与 AV.File 两种情况
+// AV.Queriable 转 AV.Object
+// q: LeanCloud 查询结果
+// 返回值：对应的 AV.Object
 export const q2o = (q: AV.Queriable) =>
   AV.parseJSON(q.toFullJSON()) as AV.Object;
 
+// 标准头文件 BlogMeta 接口
 export interface BlogMeta {
   title: string;
   id: string;

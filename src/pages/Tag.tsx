@@ -4,7 +4,7 @@ import InfoCard from "../components/InfoCard";
 import { Link, useSearchParams } from "react-router-dom";
 import MetaView from "../components/MetaView";
 import MiniCard from "../components/MiniCard";
-import { Tag as TagType, BlogMeta } from "../lib";
+import type { Tag as TagType, BlogMeta } from "../lib";
 import { HomeOutlined } from "@ant-design/icons";
 
 export default function Tag() {

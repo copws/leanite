@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { md5 } from "js-md5";
-import { Form, FormProps, Input, Button, message } from "antd";
+import { Form, type FormProps, Input, Button, message } from "antd";
 import InfoCard from "../components/InfoCard";
 import { publish } from "pubsub-js";
 import AV from "leancloud-storage";

@@ -21,11 +21,12 @@ import {
   SettingOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { init, q2o, BlogMeta } from "./lib";
+import { init, q2o, type BlogMeta } from "./lib";
 import InfoCard from "./components/InfoCard";
-import { Link, useLocation, useNavigate, useRoutes } from "react-router-dom";
+import { Link, useLocation, useNavigate, useRoutes, useSearchParams } from "react-router-dom";
 import routes from "./routes";
 import { subscribe, unsubscribe, publish } from "pubsub-js";
+import { MdCatalog } from "md-editor-rt";
 
 const { Header, Footer, Content } = Layout;
 
@@ -98,6 +99,7 @@ function App() {
   let tags: AV.Object[] = [];
   const navigate = useNavigate();
   const location = useLocation();
+  const [search] = useSearchParams();
   let [settings, setSettings] = useState<Settings>({
     name: "",
     desc: "",
@@ -159,23 +161,35 @@ function App() {
       location.pathname.includes("/leanite/settings")
     ) {
       setUseAdminMenu(true);
-      if (location.pathname.includes("/leanite/modifyArticle")) setSelectedKeys(["6"]);
+      if (location.pathname.includes("/leanite/modifyArticle"))
+        setSelectedKeys(["6"]);
       else if (location.pathname.includes("/leanite/modifyTags"))
         setSelectedKeys(["7"]);
-      else if (location.pathname.includes("/leanite/settings")) setSelectedKeys(["8"]);
+      else if (location.pathname.includes("/leanite/settings"))
+        setSelectedKeys(["8"]);
       else setSelectedKeys(["5"]);
     } else {
       setUseAdminMenu(false);
       if (location.search.length > 0) {
-        if (location.pathname.includes("/leanite/article")) setSelectedKeys(["4"]);
-        else setSelectedKeys(["2"]);
+        if (location.pathname.includes("/leanite/article")) {
+          setSelectedKeys(["4"]);
+          new AV.Query("BlogContent")
+            .equalTo("id", search.get("id"))
+            .find()
+            .then((res) => {
+              setBlogContent(q2o(res[0]));
+            });
+        } else setSelectedKeys(["2"]);
       } else {
         if (location.pathname.includes("/leanite/tag")) setSelectedKeys(["2"]);
-        else if (location.pathname.includes("/leanite/article")) setSelectedKeys(["3"]);
+        else if (location.pathname.includes("/leanite/article"))
+          setSelectedKeys(["3"]);
         else setSelectedKeys(["1"]);
       }
     }
   }, [location]);
+
+  let [blogContent, setBlogContent] = useState<AV.Object>();
 
   return (
     <Layout
@@ -204,7 +218,10 @@ function App() {
               退出登录
             </Button>
           ) : (
-            <Button type="primary" onClick={() => navigate("/leanite/authentication")}>
+            <Button
+              type="primary"
+              onClick={() => navigate("/leanite/authentication")}
+            >
               控制台
             </Button>
           )}

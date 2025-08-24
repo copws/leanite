@@ -6,13 +6,13 @@ import {
   useNavigate,
 } from "react-router-dom";
 import AV from "leancloud-storage";
-import { MDParse, q2o, BlogMeta } from "../lib";
+import { q2o, type BlogMeta } from "../lib";
 import React, { useEffect, useState } from "react";
 import InfoCard from "../components/InfoCard";
 import { Space, Divider, Tag, Breadcrumb } from "antd";
 import MetaView from "../components/MetaView";
 import { HomeOutlined } from "@ant-design/icons";
-import { convertLegacyProps } from "antd/es/button";
+import { MdPreview } from "md-editor-rt";
 
 let prevId = "";
 const Article = () => {
@@ -113,7 +113,7 @@ const Article = () => {
                     ))
                   : "无"}
               </Space>
-              {MDParse(blogContent?.get("content"))}
+              <MdPreview value={(blogContent?.get("content"))}></MdPreview>
             </InfoCard>
           </>
         ) : (

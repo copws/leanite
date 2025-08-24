@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Breadcrumb, Divider, Space, Tag } from "antd";
 import InfoCard from "../components/InfoCard";
 import AV from "leancloud-storage";
-import { BlogMeta, MDParse } from "../lib";
+import { type BlogMeta } from "../lib";
 import { Link } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
+import { MdPreview } from "md-editor-rt";
 
 export default function Home() {
   const [responses, setResponses] = useState<AV.Queriable[]>([]);
@@ -71,7 +72,7 @@ export default function Home() {
                   ))
                 : "无"}
             </Space>
-            {MDParse(q.get("content"))}
+            <MdPreview value={(q.get("content"))}></MdPreview>
           </InfoCard>
         );
       })}

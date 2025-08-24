@@ -1,5 +1,5 @@
 import React from "react";
-import { BlogMeta } from "../lib";
+import type { BlogMeta } from "../lib";
 import { Space, Tag } from "antd";
 import { Link } from "react-router-dom";
 

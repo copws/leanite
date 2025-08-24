@@ -1,61 +1,40 @@
 {
   "name": "leanite",
-  "version": "0.1.0",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.114",
-    "@types/pubsub-js": "^1.8.6",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
-    "antd": "^5.21.4",
-    "for-editor": "^0.3.5",
-    "highlight.js": "^11.10.0",
+    "antd": "^5.27.1",
+    "highlight.js": "^9.18.5",
     "js-md5": "^0.8.3",
     "leancloud-storage": "^4.15.2",
-    "markdown-it-abbr": "^2.0.0",
-    "markdown-it-deflist": "^3.0.0",
-    "markdown-it-footnote": "^4.0.0",
-    "markdown-it-sub": "^2.0.0",
-    "markdown-it-sup": "^2.0.0",
     "marked": "^1.1.1",
-    "pubsub-js": "^1.9.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.27.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "md-editor-rt": "^5.8.4",
+    "pubsub-js": "^1.9.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^6.30.1"
   },
   "devDependencies": {
-    "@types/marked": "^0.6.5"
-  },
-  "homepage": "https://copws.github.io/leanite/"
+    "@eslint/js": "^9.33.0",
+    "@types/highlight.js": "^9.12.4",
+    "@types/marked": "^0.6.5",
+    "@types/pubsub-js": "^1.8.6",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
 }
