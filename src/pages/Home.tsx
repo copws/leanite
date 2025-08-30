@@ -57,7 +57,7 @@ export default function Home() {
                 {q.get("title")}
               </Link>
             </h2>
-            <Space style={{ color: "grey" }}>
+            <Space style={{ color: "grey", width: "100%" }}>
               阅读量：{metaNow.reader - 1}
               <Divider type="vertical" />
               发布：
@@ -72,7 +72,13 @@ export default function Home() {
                   ))
                 : "无"}
             </Space>
-            <MdPreview value={(q.get("content"))}></MdPreview>
+            <Space style={{ marginTop: "10px", width: "100%" }}>
+              <MdPreview
+                value={q.get("content")}
+                previewTheme="github"
+                style={{ width: "100%" }}
+              />
+            </Space>
           </InfoCard>
         );
       })}

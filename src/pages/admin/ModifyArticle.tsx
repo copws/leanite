@@ -164,6 +164,7 @@ export default function ModifyArticle() {
               marginTop:"30px",
               border: 0
             }}
+            previewTheme="github"
           />
         </>
       ) : (

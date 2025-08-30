@@ -113,7 +113,10 @@ const Article = () => {
                     ))
                   : "无"}
               </Space>
-              <MdPreview value={(blogContent?.get("content"))}></MdPreview>
+              <MdPreview
+                value={blogContent?.get("content")}
+                previewTheme="github"
+              ></MdPreview>
             </InfoCard>
           </>
         ) : (
