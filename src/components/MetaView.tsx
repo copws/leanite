@@ -9,13 +9,13 @@ const MetaView = (props: { meta: BlogMeta }) => {
   return (
     <Space direction="horizontal">
       <strong>
-        <Link to={"/leanite/article?id=" + meta.id} style={{ color: "black" }}>
+        <Link to={"/article?id=" + meta.id} style={{ color: "black" }}>
           {meta.title}
         </Link>
       </strong>
       {meta.tags.map((tag) => (
         <Tag>
-          <Link to={"/leanite/tag?name=" + tag}>{tag}</Link>
+          <Link to={"/tag?name=" + tag}>{tag}</Link>
         </Tag>
       ))}
       <div style={{ color: "grey" }}>

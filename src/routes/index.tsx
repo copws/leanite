@@ -10,39 +10,39 @@ import { Navigate } from "react-router-dom";
 
 const routes = [
   {
-    path: "/leanite/",
-    element: <Navigate to="/leanite/home" />,
+    path: "/",
+    element: <Navigate to="/home" />,
   },
   {
-    path: "/leanite/home",
+    path: "/home",
     element: <Home />,
   },
   {
-    path: "/leanite/tag",
+    path: "/tag",
     element: <Tag />,
   },
   {
-    path: "/leanite/article",
+    path: "/article",
     element: <Article />
   },
   {
-    path: "/leanite/authentication",
+    path: "/authentication",
     element: <Authentication />,
   },
   {
-    path: "/leanite/adminHome",
+    path: "/adminHome",
     element: <AdminHome />,
   },
   {
-    path: "/leanite/modifyArticle",
+    path: "/modifyArticle",
     element: <ModifyArticle />,
   },
   {
-    path: "/leanite/modifyTags",
+    path: "/modifyTags",
     element: <ModifyTags />,
   },
   {
-    path: "/leanite/settings",
+    path: "/settings",
     element: <Settings />,
   },
 ];

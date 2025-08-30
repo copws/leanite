@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.1.2",
   "type": "module",
-  "homepage": "https://copws.github.io/leanite/",
-  "base": "/leanite/",
+  "homepage": "https://copws.github.io/",
+  "base": "/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

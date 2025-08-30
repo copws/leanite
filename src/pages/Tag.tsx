@@ -26,24 +26,24 @@ export default function Tag() {
           items={[
             {
               title: (
-                <Link to="/leanite/home">
+                <Link to="/home">
                   <HomeOutlined />
                 </Link>
               ),
             },
             {
-              title: <Link to="/leanite/tag">标签</Link>,
+              title: <Link to="/tag">标签</Link>,
             },
           ]}
         />
         <Space style={{ marginTop: "15px" }}>
-          <Link style={{ color: "black" }} to="/leanite/tag">
+          <Link style={{ color: "black" }} to="/tag">
             <MiniCard>
               <strong>标签总览</strong>
             </MiniCard>
           </Link>
           {tags.map((tag) => (
-            <Link style={{ color: "black" }} to={"/leanite/tag?name=" + tag.name}>
+            <Link style={{ color: "black" }} to={"/tag?name=" + tag.name}>
               <MiniCard>
                 <strong>{"#" + tag.name}</strong>
               </MiniCard>
@@ -71,7 +71,7 @@ export default function Tag() {
             dataSource={tags}
             renderItem={(item) => (
               <List.Item>
-                <Link to={"/leanite/tag?name=" + item.name}>{item.name}</Link>
+                <Link to={"/tag?name=" + item.name}>{item.name}</Link>
               </List.Item>
             )}
           />

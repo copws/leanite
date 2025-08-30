@@ -26,7 +26,7 @@ root.render(
         },
       }}
     >
-      <BrowserRouter>
+      <BrowserRouter basename="/leanite/">
         <App />
       </BrowserRouter>
     </ConfigProvider>

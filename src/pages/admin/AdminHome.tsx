@@ -14,7 +14,7 @@ export default function AdminHome() {
       if (!data) {
         message.error("您需要登录");
         verified = true;
-        navigate("/leanite/authentication");
+        navigate("/authentication");
       }
     });
     if (!verified) {

@@ -51,4 +51,5 @@ export default defineConfig({
       },
     },
   },
+  base: "https://copws.github.io/leanite/",
 });

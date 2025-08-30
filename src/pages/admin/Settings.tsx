@@ -24,14 +24,14 @@ export default function Settings() {
     setAvatarURL(settings.avatarURL);
     setBulletin(settings.bulletin);
     setBlogIcon(settings.blogIcon);
-    navigate("/leanite/settings");
+    navigate("/settings");
   };
   useEffect(() => {
     subscribe("setAuth", (_, data) => {
       if (!data) {
         message.error("您需要登录");
         verified = true;
-        navigate("/leanite/authentication");
+        navigate("/authentication");
       } else {
         id = "";
         new AV.Query("Settings")
@@ -76,7 +76,7 @@ export default function Settings() {
     unuploaded.set("passkey2", md5(password + "+" + md5(username)));
     unuploaded.save().then(() => {
       message.success("保存成功！");
-      navigate("/leanite/home");
+      navigate("/home");
     });
   };
   return (

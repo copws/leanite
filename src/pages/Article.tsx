@@ -26,8 +26,7 @@ const Article = () => {
   useEffect(() => {
     blogMeta = JSON.parse(localStorage.getItem("blogMeta") as string);
     setBlogMeta(blogMeta);
-    console.log(location.search, id);
-    if (id && prevId !== id) {
+    if (id) {
       prevId = id;
       new AV.Query("BlogContent")
         .equalTo("id", id)
@@ -56,7 +55,7 @@ const Article = () => {
         }
       }
       setArticles(articles);
-      navigate("/leanite/article");
+      navigate("/article");
     }
   }, [location]);
   let metaNow: BlogMeta = {
@@ -81,16 +80,14 @@ const Article = () => {
                 items={[
                   {
                     title: (
-                      <Link to="/leanite/home">
+                      <Link to="/home">
                         <HomeOutlined />
                       </Link>
                     ),
                   },
                   {
                     title: (
-                      <Link to={"/leanite/article?id=" + id}>
-                        {metaNow.title}
-                      </Link>
+                      <Link to={"/article?id=" + id}>{metaNow.title}</Link>
                     ),
                   },
                 ]}
@@ -108,15 +105,17 @@ const Article = () => {
                 {metaNow?.tags.length > 0
                   ? metaNow.tags.map((tag) => (
                       <Tag>
-                        <Link to={"/leanite/tag?name=" + tag}>{tag}</Link>
+                        <Link to={"/tag?name=" + tag}>{tag}</Link>
                       </Tag>
                     ))
                   : "无"}
               </Space>
-              <MdPreview
-                value={blogContent?.get("content")}
-                previewTheme="github"
-              ></MdPreview>
+              <div style={{ marginTop: "10px" }}>
+                <MdPreview
+                  value={blogContent?.get("content")}
+                  previewTheme="github"
+                />
+              </div>
             </InfoCard>
           </>
         ) : (
@@ -126,13 +125,13 @@ const Article = () => {
                 items={[
                   {
                     title: (
-                      <Link to="/leanite/home">
+                      <Link to="/home">
                         <HomeOutlined />
                       </Link>
                     ),
                   },
                   {
-                    title: <Link to="/leanite/article">归档</Link>,
+                    title: <Link to="/article">归档</Link>,
                   },
                 ]}
               />

@@ -32,13 +32,13 @@ export default function Home() {
           items={[
             {
               title: (
-                <Link to="/leanite/home">
+                <Link to="/home">
                   <HomeOutlined />
                 </Link>
               ),
             },
             {
-              title: <Link to="/leanite/home">首页</Link>,
+              title: <Link to="/home">首页</Link>,
             },
           ]}
         />
@@ -51,7 +51,7 @@ export default function Home() {
           <InfoCard key={Math.random()}>
             <h2>
               <Link
-                to={"/leanite/article?id=" + q.get("id")}
+                to={"/article?id=" + q.get("id")}
                 style={{ color: "black" }}
               >
                 {q.get("title")}
@@ -67,18 +67,18 @@ export default function Home() {
               {metaNow?.tags.length > 0
                 ? metaNow.tags.map((tag) => (
                     <Tag>
-                      <Link to={"/leanite/tag?name=" + tag}>{tag}</Link>
+                      <Link to={"/tag?name=" + tag}>{tag}</Link>
                     </Tag>
                   ))
                 : "无"}
             </Space>
-            <Space style={{ marginTop: "10px", width: "100%" }}>
+            <div style={{ marginTop: "10px" }}>
               <MdPreview
                 value={q.get("content")}
                 previewTheme="github"
                 style={{ width: "100%" }}
-              />
-            </Space>
+              ></MdPreview>
+            </div>
           </InfoCard>
         );
       })}

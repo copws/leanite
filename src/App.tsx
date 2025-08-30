@@ -33,17 +33,17 @@ const { Header, Footer, Content } = Layout;
 const items = [
   {
     key: "1",
-    label: <Link to="/leanite/home">首页</Link>,
+    label: <Link to="/home">首页</Link>,
     icon: <HomeOutlined />,
   },
   {
     key: "2",
-    label: <Link to="/leanite/tag">标签</Link>,
+    label: <Link to="/tag">标签</Link>,
     icon: <TagsOutlined />,
   },
   {
     key: "3",
-    label: <Link to="/leanite/article">归档</Link>,
+    label: <Link to="/article">归档</Link>,
     icon: <ProfileOutlined />,
   },
   {
@@ -56,22 +56,22 @@ const items = [
 const adminItems = [
   {
     key: "5",
-    label: <Link to="/leanite/adminHome">控制台</Link>,
+    label: <Link to="/adminHome">控制台</Link>,
     icon: <ControlOutlined />,
   },
   {
     key: "6",
-    label: <Link to="/leanite/modifyArticle">文章管理</Link>,
+    label: <Link to="/modifyArticle">文章管理</Link>,
     icon: <EditOutlined />,
   },
   {
     key: "7",
-    label: <Link to="/leanite/modifyTags">标签管理</Link>,
+    label: <Link to="/modifyTags">标签管理</Link>,
     icon: <TagsOutlined />,
   },
   {
     key: "8",
-    label: <Link to="/leanite/settings">设置</Link>,
+    label: <Link to="/settings">设置</Link>,
     icon: <SettingOutlined />,
   },
 ];
@@ -145,7 +145,7 @@ function App() {
       });
     subscribe("auth", () => {
       authenticated = true;
-      navigate("/leanite/adminHome");
+      navigate("/adminHome");
     });
     subscribe("isAuthed", () => publish("setAuth", authenticated));
     return () => {
@@ -156,22 +156,22 @@ function App() {
   const [useAdminMenu, setUseAdminMenu] = useState<boolean>(false);
   useEffect(() => {
     if (
-      location.pathname.includes("/leanite/adminHome") ||
-      location.pathname.includes("/leanite/modify") ||
-      location.pathname.includes("/leanite/settings")
+      location.pathname.includes("/adminHome") ||
+      location.pathname.includes("/modify") ||
+      location.pathname.includes("/settings")
     ) {
       setUseAdminMenu(true);
-      if (location.pathname.includes("/leanite/modifyArticle"))
+      if (location.pathname.includes("/modifyArticle"))
         setSelectedKeys(["6"]);
-      else if (location.pathname.includes("/leanite/modifyTags"))
+      else if (location.pathname.includes("/modifyTags"))
         setSelectedKeys(["7"]);
-      else if (location.pathname.includes("/leanite/settings"))
+      else if (location.pathname.includes("/settings"))
         setSelectedKeys(["8"]);
       else setSelectedKeys(["5"]);
     } else {
       setUseAdminMenu(false);
       if (location.search.length > 0) {
-        if (location.pathname.includes("/leanite/article")) {
+        if (location.pathname.includes("/article")) {
           setSelectedKeys(["4"]);
           new AV.Query("BlogContent")
             .equalTo("id", search.get("id"))
@@ -181,8 +181,8 @@ function App() {
             });
         } else setSelectedKeys(["2"]);
       } else {
-        if (location.pathname.includes("/leanite/tag")) setSelectedKeys(["2"]);
-        else if (location.pathname.includes("/leanite/article"))
+        if (location.pathname.includes("/tag")) setSelectedKeys(["2"]);
+        else if (location.pathname.includes("/article"))
           setSelectedKeys(["3"]);
         else setSelectedKeys(["1"]);
       }
@@ -202,7 +202,7 @@ function App() {
           marginBottom: "15px",
         }}
       >
-        <Link to="/leanite/home">
+        <Link to="/home">
           <Avatar src={settings.blogIcon} />
         </Link>
         <Space style={{ float: "right" }}>
@@ -212,7 +212,7 @@ function App() {
               type="primary"
               onClick={() => {
                 authenticated = false;
-                navigate("/leanite/home");
+                navigate("/home");
               }}
             >
               退出登录
@@ -220,7 +220,7 @@ function App() {
           ) : (
             <Button
               type="primary"
-              onClick={() => navigate("/leanite/authentication")}
+              onClick={() => navigate("/authentication")}
             >
               控制台
             </Button>

@@ -17,7 +17,7 @@ export function init() {
   blogContent.set("id", "1");
   blogContent.set(
     "content",
-    `**欢迎使用 Leanite！**这是你的第一篇博客。\n\n访问 [Leanite 的 GitHub 仓库](https://github.com/copws/leanite/) 获取更多信息。`
+    `**欢迎使用 Leanite！**这是你的第一篇博客。\n\n访问 [Leanite 的 GitHub 仓库](https://github.com/copws/) 获取更多信息。`
   );
   const settings = new AV.Object("Settings");
   settings.set("owner", "admin");

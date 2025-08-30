@@ -40,7 +40,7 @@ export default function ModifyArticle() {
       if (!data) {
         message.error("您需要登录");
         verified = true;
-        navigate("/leanite/authentication");
+        navigate("/authentication");
       } else {
         console.log("%");
         setTags(JSON.parse(localStorage.getItem("tags") as string));
@@ -79,8 +79,8 @@ export default function ModifyArticle() {
     }
     console.log(currentMeta);
     setEditTitle(currentMeta.title);
-    if (!createNew) navigate("/leanite/modifyArticle?id=" + id);
-    else navigate("/leanite/modifyArticle?id=" + id + "&new=1");
+    if (!createNew) navigate("/modifyArticle?id=" + id);
+    else navigate("/modifyArticle?id=" + id + "&new=1");
   }
 
   return (
@@ -125,7 +125,7 @@ export default function ModifyArticle() {
                         });
                       }
                       setBlogMeta(blogMeta);
-                      navigate("/leanite/modifyArticle");
+                      navigate("/modifyArticle");
                     },
                     (err) => message.error("出错了！" + err)
                   );
@@ -146,7 +146,7 @@ export default function ModifyArticle() {
                   setEditTitle("");
                   setEditValue("");
                   setCurrentContent(undefined);
-                  navigate("/leanite/modifyArticle");
+                  navigate("/modifyArticle");
                 }}
                 okText="确认"
                 cancelText="取消"
@@ -187,7 +187,7 @@ export default function ModifyArticle() {
                   console.log(content);
                   setCurrentContent(content);
                   navigate(
-                    "/leanite/modifyArticle?id=" + content.get("id") + "&new=1"
+                    "/modifyArticle?id=" + content.get("id") + "&new=1"
                   );
                 }}
                 type="primary"
@@ -221,9 +221,9 @@ export default function ModifyArticle() {
                           .then((res) => {
                             setEditValue(q2o(res[0]).get("content"));
                             setCurrentContent(q2o(res[0]));
-                            navigate("/leanite/modifyArticle?id=" + meta.id);
+                            navigate("/modifyArticle?id=" + meta.id);
                           });
-                        navigate("/leanite/modifyArticle?id=" + meta.id);
+                        navigate("/modifyArticle?id=" + meta.id);
                       }}
                     >
                       编辑
@@ -236,7 +236,7 @@ export default function ModifyArticle() {
                         blogMeta.splice(index, 1);
                         setBlogMeta(blogMeta);
                         console.log(tags);
-                        navigate("/leanite/modifyArticle");
+                        navigate("/modifyArticle");
                       }}
                       okText="确认"
                       cancelText="取消"
@@ -245,7 +245,7 @@ export default function ModifyArticle() {
                     </Popconfirm>,
                   ]}
                 >
-                  <Link to={"/leanite/article?id=" + meta.id}>
+                  <Link to={"/article?id=" + meta.id}>
                     {meta.title}
                   </Link>
                 </List.Item>

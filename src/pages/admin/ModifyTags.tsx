@@ -37,7 +37,7 @@ export default function ModifyTags() {
       if (!data) {
         message.error("您需要登录");
         verified = true;
-        navigate("/leanite/authentication");
+        navigate("/authentication");
       } else {
         setTags(JSON.parse(localStorage.getItem("tags") as string));
         setBlogMeta(JSON.parse(localStorage.getItem("blogMeta") as string));
@@ -90,7 +90,7 @@ export default function ModifyTags() {
     }
     setIsCreating(false);
     setCreateValue("");
-    navigate("/leanite/modifyTags");
+    navigate("/modifyTags");
   };
 
   // modifyArticlesInOneTag
@@ -116,12 +116,12 @@ export default function ModifyTags() {
                     type="primary"
                     onClick={() => {
                       setIsModifying(true);
-                      navigate("/leanite/modifyTags?name=" + name);
+                      navigate("/modifyTags?name=" + name);
                     }}
                   >
                     添加或删除文章……
                   </Button>
-                  <Link to="/leanite/modifyTags">
+                  <Link to="/modifyTags">
                     <Button>返回上一级</Button>
                   </Link>
                 </Space>
@@ -130,7 +130,7 @@ export default function ModifyTags() {
               renderItem={(item: string) => {
                 return (
                   <List.Item>
-                    <Link to={"/leanite/article?id=" + item}>
+                    <Link to={"/article?id=" + item}>
                       {blogMeta.find((m) => m.id === item)?.title}
                     </Link>
                   </List.Item>
@@ -186,7 +186,7 @@ export default function ModifyTags() {
                         checked;
                       setTags(tags);
                       setIsModifying(false);
-                      navigate("/leanite/modifyTags?name=" + name);
+                      navigate("/modifyTags?name=" + name);
                     }}
                     type="primary"
                     style={{ float: "right" }}
@@ -218,7 +218,7 @@ export default function ModifyTags() {
                   type="primary"
                   onClick={() => {
                     setIsCreating(true);
-                    navigate("/leanite/modifyTags");
+                    navigate("/modifyTags");
                   }}
                 >
                   添加新标签
@@ -241,7 +241,7 @@ export default function ModifyTags() {
                 }
                 renameState[index] = false;
                 setRenameState(renameState);
-                navigate("/leanite/modifyTags");
+                navigate("/modifyTags");
               };
               return (
                 <List.Item
@@ -250,7 +250,7 @@ export default function ModifyTags() {
                       onClick={() => {
                         renameState[index] = true;
                         setRenameState(renameState);
-                        navigate("/leanite/modifyTags");
+                        navigate("/modifyTags");
                       }}
                     >
                       重命名
@@ -262,7 +262,7 @@ export default function ModifyTags() {
                         deleteTags(index);
                         tags.splice(index, 1);
                         setTags(tags);
-                        navigate("/leanite/modifyTags");
+                        navigate("/modifyTags");
                       }}
                       okText="确认"
                       cancelText="取消"
@@ -280,7 +280,7 @@ export default function ModifyTags() {
                       onBlur={handleRenameDone}
                     />
                   ) : (
-                    <Link to={"/leanite/modifyTags?name=" + item.name}>
+                    <Link to={"/modifyTags?name=" + item.name}>
                       {item.name}
                     </Link>
                   )}
@@ -296,7 +296,7 @@ export default function ModifyTags() {
         onCancel={(_) => {
           setIsCreating(false);
           setCreateValue("");
-          navigate("/leanite/modifyTags");
+          navigate("/modifyTags");
         }}
         onOk={handleCreateDone}
       >
