@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.2",
   "type": "module",
+  "homepage": "https://copws.github.io/leanite/",
   "base": "/leanite/",
   "scripts": {
     "dev": "vite",
