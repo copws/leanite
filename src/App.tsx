@@ -275,7 +275,7 @@ function App() {
             <div
               style={{ marginTop: "30px", width: "100%", color: "lightgrey" }}
             >
-              Leanite Blog, 版本 0.1.0
+              Leanite Blog, 版本 0.1.2
             </div>
           </Col>
         </Row>
