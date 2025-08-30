@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.2",
   "type": "module",
-  "base": "leanite/",
+  "base": "/leanite/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
