@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { md5 } from "js-md5";
-import { Form, type FormProps, Input, Button, message } from "antd";
+import { Form, type FormProps, Input, Button, App } from "antd";
 import InfoCard from "../components/InfoCard";
 import { publish } from "pubsub-js";
 import AV from "leancloud-storage";
@@ -10,36 +10,38 @@ type FieldType = {
   password?: string;
 };
 
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-  if (
-    md5((values.username as string) + "+" + md5(values.password as string)) ===
-      passkey1 &&
-    md5((values.password as string) + "+" + md5(values.username as string)) ===
-      passkey2
-  ) {
-    message.success("验证成功！");
-    publish("auth");
-  } else message.error("验证失败！");
-};
-
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  for (let i in errorInfo.errorFields)
-    message.error(errorInfo.errorFields[i].errors);
-};
-
 let passkey1: string;
 let passkey2: string;
 export default function Authentication() {
+  const { message } = App.useApp();
+
   useEffect(() => {
-    new AV.Query("Settings")
-      .equalTo("owner", "admin")
-      .find()
-      .then((res) => {
-        const i = res[0];
-        passkey1 = i.get("passkey1");
-        passkey2 = i.get("passkey2");
-      });
+    new AV.Query("Settings").first().then((res) => {
+      passkey1 = res?.get("passkey1");
+      passkey2 = res?.get("passkey2");
+    });
   }, []);
+
+  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
+    if (
+      md5(
+        (values.username as string) + "+" + md5(values.password as string)
+      ) === passkey1 &&
+      md5(
+        (values.password as string) + "+" + md5(values.username as string)
+      ) === passkey2
+    ) {
+      message.success("验证成功！");
+      publish("auth");
+    } else message.error("验证失败！");
+  };
+
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
+    for (let i in errorInfo.errorFields)
+      message.error(errorInfo.errorFields[i].errors);
+  };
 
   return (
     <InfoCard>

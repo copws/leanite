@@ -36,16 +36,14 @@ export default function Settings() {
         navigate("/authentication");
       } else {
         id = "";
-        new AV.Query("Settings")
-          .equalTo("owner", "admin")
-          .find()
+        new AV.Query("Settings").first()
           .then((res) => {
-            id = res[0].get("objectId");
-            settings.name = res[0].get("name");
-            settings.desc = res[0].get("desc");
-            settings.avatarURL = res[0].get("avatarURL");
-            settings.bulletin = res[0].get("bulletin");
-            settings.blogIcon = res[0].get("blogIcon");
+            id = res?.get("objectId");
+            settings.name = res?.get("name");
+            settings.desc = res?.get("desc");
+            settings.avatarURL = res?.get("avatarURL");
+            settings.bulletin = res?.get("bulletin");
+            settings.blogIcon = res?.get("blogIcon");
             reset();
           });
       }

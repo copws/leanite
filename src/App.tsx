@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
 import AV from "leancloud-storage";
-import { Col, Layout, Row, Menu, Button, Space, Card, Avatar } from "antd";
+import {
+  Col,
+  Layout,
+  Row,
+  Menu,
+  Button,
+  Space,
+  Card,
+  Avatar,
+  Spin,
+  App as AntdApp,
+} from "antd";
 import {
   TagsOutlined,
   ProfileOutlined,
@@ -10,7 +21,7 @@ import {
   SettingOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { init, q2o } from "./lib";
+import { init, q2o, arrEqual, type Tag, type BlogMeta } from "./lib";
 import InfoCard from "./components/InfoCard";
 import {
   Link,
@@ -79,16 +90,11 @@ interface Settings {
   bulletin: string;
 }
 
-new AV.Object("Init").save().then((_) =>
-  new AV.Query("Init").find().then((res) => {
-    console.log(res.length);
-    if (res.length <= 1) init();
-    else q2o(res[0]).destroy();
-  })
-);
-
 let authenticated = false;
+let checkedInit = false;
 function App() {
+  const { message } = AntdApp.useApp();
+
   const route = useRoutes(routes);
   let blogMeta: AV.Object[] = [];
   let tags: AV.Object[] = [];
@@ -131,20 +137,41 @@ function App() {
   }
 
   function updateSettings() {
-    new AV.Query("Settings")
-      .equalTo("owner", "admin")
-      .find()
-      .then((res) => {
-        settings.name = res[0].get("name");
-        settings.desc = res[0].get("desc");
-        settings.avatarURL = res[0].get("avatarURL");
-        settings.bulletin = res[0].get("bulletin");
-        settings.blogIcon = res[0].get("blogIcon");
-        setSettings(settings);
-        navigate(location.pathname + location.search);
-      });
+    new AV.Query("Settings").first().then((res) => {
+      settings.name = res?.get("name");
+      settings.desc = res?.get("desc");
+      settings.avatarURL = res?.get("avatarURL");
+      settings.bulletin = res?.get("bulletin");
+      settings.blogIcon = res?.get("blogIcon");
+      setSettings(settings);
+      navigate(location.pathname + location.search);
+    });
   }
+
+  const [spinning, setSpinning] = useState(false);
   useEffect(() => {
+    if (checkedInit === false) {
+      checkedInit = true;
+      (async () => {
+        setSpinning(true);
+        await new AV.Object("Init").save().then((_) =>
+          new AV.Query("Init").find().then(async (res) => {
+            console.log(res.length);
+            if (res.length <= 1) {
+              await init();
+              updateBlogMeta();
+              setTimeout(updateTags, 500);
+              updateSettings();
+              setSpinning(false);
+            } else {
+              console.log("init有问题");
+              q2o(res[0]).destroy();
+              setSpinning(false);
+            }
+          })
+        );
+      })();
+    }
     updateBlogMeta();
     setTimeout(updateTags, 500);
     subscribe("updateSettings", updateSettings);
@@ -163,6 +190,7 @@ function App() {
       unsubscribe("isAuthed");
       unsubscribe("openSidebar");
       unsubscribe("closeSidebar");
+      unsubscribe("updateSettings");
     };
   }, []);
 
@@ -204,6 +232,163 @@ function App() {
 
   const [showSidebar, setShowSidebar] = useState(true);
 
+  const upload = () => {
+    // 第一步：从 LocalStorage 里拿现在的 meta、tag 数据和原始的数据
+    const tags: Tag[] = JSON.parse(localStorage.getItem("tags") as string);
+    const blogMeta: BlogMeta[] = JSON.parse(
+      localStorage.getItem("blogMeta") as string
+    );
+    let tagsOriginal: Tag[] = JSON.parse(
+      localStorage.getItem("tagsOriginal") as string
+    );
+    let blogMetaOriginal: BlogMeta[] = JSON.parse(
+      localStorage.getItem("blogMetaOriginal") as string
+    );
+    // 未上传的 meta、tags
+    const unmodifiedTags: AV.Object[] = [];
+    const unmodifiedMetas: AV.Object[] = [];
+    console.log(tags, blogMeta, tagsOriginal, blogMetaOriginal);
+
+    // 第二步：找出所有已经更改的 Meta
+    for (let i in blogMeta) {
+      const meta = blogMeta[i];
+      if (meta.objectId.length <= 0) {
+        // This meta hasn't been created yet
+        console.log(
+          "This meta hasn't been created yet, " + meta.title,
+          meta.id
+        );
+        const newMeta = new AV.Object("BlogMeta");
+        newMeta.set("title", meta.title);
+        newMeta.set("reader", 1);
+        newMeta.set("tags", meta.tags);
+        newMeta.set("id", meta.id);
+        newMeta.set("isDraft", meta.isDraft);
+        unmodifiedMetas.push(newMeta);
+      } else {
+        // 修改过的 meta
+        const original = blogMetaOriginal.find((om) => om.id === meta.id);
+        blogMetaOriginal = blogMetaOriginal.filter((om) => om.id !== meta.id);
+        if (!original) continue;
+        let modifiedMeta: AV.Object | undefined = undefined;
+        if (original.title !== meta.title) {
+          modifiedMeta = AV.Object.createWithoutData(
+            "BlogMeta",
+            original.objectId
+          );
+          modifiedMeta.set("title", meta.title);
+        }
+        console.log(
+          meta.title,
+          original.tags,
+          meta.tags,
+          arrEqual(original.tags, meta.tags)
+        );
+        if (!arrEqual(original.tags, meta.tags)) {
+          if (!modifiedMeta)
+            modifiedMeta = AV.Object.createWithoutData(
+              "BlogMeta",
+              original.objectId
+            );
+          modifiedMeta.set("tags", meta.tags);
+        }
+        if (original.isDraft !== meta.isDraft) {
+          if (!modifiedMeta)
+            modifiedMeta = AV.Object.createWithoutData(
+              "BlogMeta",
+              original.objectId
+            );
+          modifiedMeta.set("isDraft", meta.isDraft);
+        }
+        if (modifiedMeta) {
+          unmodifiedMetas.push(modifiedMeta);
+        }
+      }
+    }
+
+    // 第三步：Tags
+    for (let i in tags) {
+      const tag = tags[i];
+      // 按照创建时间降序排序
+      tag.ids = blogMeta
+        .filter((meta) => tag.ids.includes(meta.id))
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        .map((meta) => meta.id);
+      if (tag.objectId.length <= 0) {
+        console.log(tag);
+        console.log("This tag hasn't been created yet, " + tag.name);
+        const newTag = new AV.Object("Tags");
+        newTag.set("name", tag.name);
+        newTag.set("ids", tag.ids);
+        unmodifiedTags.push(newTag);
+      } else {
+        const original = tagsOriginal.find(
+          (om) => om.objectId === tag.objectId
+        );
+        tagsOriginal = tagsOriginal.filter(
+          (ot) => ot.objectId !== tag.objectId
+        );
+        if (!original) continue;
+        let modifiedTag: AV.Object | undefined = undefined;
+        console.log("original: ", original);
+        if (original.name !== tag.name) {
+          modifiedTag = AV.Object.createWithoutData("Tags", original.objectId);
+          modifiedTag.set("name", tag.name);
+        }
+        if (!arrEqual(original.ids, tag.ids)) {
+          if (!modifiedTag)
+            modifiedTag = AV.Object.createWithoutData(
+              "Tags",
+              original.objectId
+            );
+          modifiedTag.set("ids", tag.ids);
+        }
+        if (modifiedTag) {
+          unmodifiedTags.push(modifiedTag);
+        }
+      }
+    }
+
+    // 第四步：上传
+    console.log(
+      unmodifiedMetas,
+      unmodifiedTags,
+      tagsOriginal,
+      blogMetaOriginal
+    );
+    if (
+      unmodifiedMetas.length <= 0 &&
+      unmodifiedTags.length <= 0 &&
+      tagsOriginal.length <= 0 &&
+      blogMetaOriginal.length <= 0
+    ) {
+      console.log("everything is up-to-date");
+      message.info("当前没有需要上传的内容");
+    } else {
+      AV.Object.saveAll(unmodifiedTags).then(
+        () => console.log("tag 上传成功！"),
+        (err) => console.log("tag 上传失败，", err)
+      );
+      AV.Object.saveAll(unmodifiedMetas).then(
+        () => console.log("meta 上传成功！"),
+        (err) => console.log("meta 上传失败", err)
+      );
+      for (let i in tagsOriginal)
+        AV.Object.createWithoutData("Tags", tagsOriginal[i].objectId).destroy();
+      for (let i in blogMetaOriginal)
+        AV.Object.createWithoutData(
+          "BlogMeta",
+          blogMetaOriginal[i].objectId
+        ).destroy();
+      localStorage.setItem("blogMetaOriginal", JSON.stringify(blogMeta));
+      localStorage.setItem("tagsOriginal", JSON.stringify(tags));
+      message.success("上传成功");
+    }
+  };
+
   return (
     <Layout
       className="App"
@@ -223,6 +408,7 @@ function App() {
             <Button
               type="primary"
               onClick={() => {
+                upload();
                 authenticated = false;
                 navigate("/home");
               }}
@@ -266,7 +452,18 @@ function App() {
                   </Card>
                 </>
               ) : (
-                <></>
+                <InfoCard>
+                  <strong>保存更改</strong>
+                  <p>
+                    这个小按钮可以帮你把更改保存至 LeanCloud
+                    云端，所以更改后不要忘了保存哦！
+                    <br />
+                    如果不小心忘了也没关系，在点击“退出登录”时我们会自动帮你保存。
+                  </p>
+                  <Button type="primary" onClick={upload}>
+                    保存更改
+                  </Button>
+                </InfoCard>
               )}
               <InfoCard>
                 {useAdminMenu ? (
@@ -292,7 +489,7 @@ function App() {
               <div
                 style={{ marginTop: "30px", width: "100%", color: "lightgrey" }}
               >
-                Leanite Blog, 版本 0.1.3
+                Leanite Blog, 版本 0.2.0
               </div>
             </Col>
           ) : (
@@ -301,6 +498,7 @@ function App() {
         </Row>
       </Content>
       <Footer style={{ backgroundColor: "rgba(0,0,0,0)" }} />
+      <Spin fullscreen spinning={spinning} />
     </Layout>
   );
 }
