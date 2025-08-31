@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { Button, Input, List, message, Popconfirm, Space } from "antd";
+import {
+  Button,
+  Input,
+  List,
+  Popconfirm,
+  Space,
+  Tag as AntdTag,
+  Divider,
+  App,
+} from "antd";
 import { subscribe, publish, unsubscribe } from "pubsub-js";
 import { type Tag, type BlogMeta, q2o } from "../../lib";
 import InfoCard from "../../components/InfoCard";
@@ -11,6 +20,7 @@ import "md-editor-rt/lib/style.css";
 
 let verified = false;
 export default function ModifyArticle() {
+  const { message } = App.useApp();
   let [tags, _setTags] = useState<Tag[]>([]);
   const setTags = (tgs: Tag[]) => {
     localStorage.setItem("tags", JSON.stringify(tgs));
@@ -33,6 +43,7 @@ export default function ModifyArticle() {
     reader: 0,
     tags: [],
     updatedAt: "",
+    isDraft: true,
   };
 
   useEffect(() => {
@@ -64,6 +75,7 @@ export default function ModifyArticle() {
   const [currentContent, setCurrentContent] = useState<AV.Object>();
 
   if (id && editTitle.length <= 0) {
+    publish("closeSidebar");
     if (!createNew) {
       currentMeta = blogMeta.find((meta) => meta.id === id) as BlogMeta;
     } else {
@@ -75,6 +87,7 @@ export default function ModifyArticle() {
         tags: [],
         reader: 0,
         id: "",
+        isDraft: true,
       };
     }
     console.log(currentMeta);
@@ -82,6 +95,39 @@ export default function ModifyArticle() {
     if (!createNew) navigate("/modifyArticle?id=" + id);
     else navigate("/modifyArticle?id=" + id + "&new=1");
   }
+
+  const saveArticle = (isDraft: boolean) => () => {
+    if (!createNew) {
+      const metaIndex = blogMeta.findIndex((meta) => meta.id === id);
+      blogMeta[metaIndex].title = editTitle;
+      blogMeta[metaIndex].isDraft = isDraft;
+      setBlogMeta(blogMeta);
+    }
+    currentContent?.set("title", editTitle);
+    currentContent?.set("content", editValue);
+    currentContent?.set("isDraft", isDraft);
+    currentContent?.save().then(
+      (res) => {
+        message.success("成功");
+        if (createNew) {
+          blogMeta.push({
+            objectId: "",
+            createdAt: "",
+            title: editTitle,
+            tags: [],
+            reader: 0,
+            id: res.get("id"),
+            updatedAt: "",
+            isDraft: isDraft,
+          });
+        }
+        setBlogMeta(blogMeta);
+        publish("openSidebar");
+        navigate("/modifyArticle");
+      },
+      (err) => message.error("出错了！" + err)
+    );
+  };
 
   return (
     <div>
@@ -93,55 +139,29 @@ export default function ModifyArticle() {
               <Input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.currentTarget.value)}
+                style={{ width: "50vw" }}
               />
               <Popconfirm
-                title={createNew ? "确认创建" : "确认更改"}
-                description={
-                  "你确定要" +
-                  (createNew ? "创建" : "更改") +
-                  "文章吗？此操作不可撤销。"
-                }
-                onConfirm={() => {
-                  if (!createNew) {
-                    blogMeta[
-                      blogMeta.findIndex((meta) => meta.id === id)
-                    ].title = editTitle;
-                    setBlogMeta(blogMeta);
-                  }
-                  currentContent?.set("title", editTitle);
-                  currentContent?.set("content", editValue);
-                  currentContent?.save().then(
-                    (res) => {
-                      message.success("成功");
-                      if (createNew) {
-                        blogMeta.push({
-                          objectId: "",
-                          createdAt: "",
-                          title: editTitle,
-                          tags: [],
-                          reader: 0,
-                          id: res.get("id"),
-                          updatedAt: "",
-                        });
-                      }
-                      setBlogMeta(blogMeta);
-                      navigate("/modifyArticle");
-                    },
-                    (err) => message.error("出错了！" + err)
-                  );
-                }}
+                title="确认"
+                description={"你确定要发布文章吗？此操作不可撤销。"}
+                onConfirm={saveArticle(false)}
                 okText="确认"
                 cancelText="取消"
               >
-                <Button type="primary">完成</Button>
+                <Button type="primary">发布文章</Button>
               </Popconfirm>
               <Popconfirm
-                title="确认取消"
-                description={
-                  "你确定要取消" +
-                  (createNew ? "创建" : "更改") +
-                  "吗？此操作不可撤销。"
-                }
+                title="确认"
+                description={"你确定要保存草稿吗？此操作不可撤销。"}
+                onConfirm={saveArticle(true)}
+                okText="确认"
+                cancelText="取消"
+              >
+                <Button>保存草稿</Button>
+              </Popconfirm>
+              <Popconfirm
+                title="确认"
+                description={"你确定要取消吗？此操作不可撤销。"}
                 onConfirm={() => {
                   setEditTitle("");
                   setEditValue("");
@@ -161,8 +181,8 @@ export default function ModifyArticle() {
               setEditValue(e);
             }}
             style={{
-              marginTop:"30px",
-              border: 0
+              marginTop: "30px",
+              border: 0,
             }}
             previewTheme="github"
           />
@@ -186,9 +206,7 @@ export default function ModifyArticle() {
                   content.set("title", "");
                   console.log(content);
                   setCurrentContent(content);
-                  navigate(
-                    "/modifyArticle?id=" + content.get("id") + "&new=1"
-                  );
+                  navigate("/modifyArticle?id=" + content.get("id") + "&new=1");
                 }}
                 type="primary"
                 style={{ float: "right" }}
@@ -246,7 +264,13 @@ export default function ModifyArticle() {
                   ]}
                 >
                   <Link to={"/article?id=" + meta.id}>
-                    {meta.title}
+                    {meta.title.trimEnd()}
+                    <Divider type="vertical" />
+                    {meta.isDraft ? (
+                      <AntdTag color="orange">草稿</AntdTag>
+                    ) : (
+                      <AntdTag color="green">已发布</AntdTag>
+                    )}
                   </Link>
                 </List.Item>
               );

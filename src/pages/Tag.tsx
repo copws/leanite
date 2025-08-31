@@ -36,7 +36,7 @@ export default function Tag() {
             },
           ]}
         />
-        <Space style={{ marginTop: "15px" }}>
+        <Space style={{ marginTop: "15px", display: "flex", flexWrap: "wrap" }}>
           <Link style={{ color: "black" }} to="/tag">
             <MiniCard>
               <strong>标签总览</strong>
@@ -57,13 +57,15 @@ export default function Tag() {
           <List
             header={<div>{name}</div>}
             dataSource={tags.find((o) => o.name === name)?.ids}
-            renderItem={(item: string) => (
-              <List.Item>
-                <MetaView
-                  meta={blogMeta.find((m) => m.id === item) as BlogMeta}
-                />
-              </List.Item>
-            )}
+            renderItem={(item: string) => {
+              const meta = blogMeta.find((m) => m.id === item) as BlogMeta;
+              if (meta.isDraft) return <></>;
+              return (
+                <List.Item>
+                  <MetaView meta={meta} />
+                </List.Item>
+              );
+            }}
           />
         ) : (
           <List

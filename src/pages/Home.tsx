@@ -19,6 +19,7 @@ export default function Home() {
       setResponses(
         await new AV.Query("BlogContent")
           .descending("createdAt")
+          .notEqualTo("isDraft", true)
           .limit(5)
           .find()
       );

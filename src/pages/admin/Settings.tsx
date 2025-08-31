@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, message, Space, Popconfirm } from "antd";
+import { Button, Input, App, Space, Popconfirm } from "antd";
 import { subscribe, publish, unsubscribe } from "pubsub-js";
 import InfoCard from "../../components/InfoCard";
 import AV from "leancloud-storage";
 import { md5 } from "js-md5";
 import OptionCard from "../../components/OptionCard";
+import { MdEditor } from "md-editor-rt";
 
 let verified = false;
 const settings = {
@@ -17,6 +18,7 @@ const settings = {
 };
 let id: string;
 export default function Settings() {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const reset = () => {
     setName(settings.name);
@@ -66,6 +68,7 @@ export default function Settings() {
   const [password, setPassword] = useState<string>("");
 
   const handleDone = () => {
+    console.log("s")
     const unuploaded = AV.Object.createWithoutData("Settings", id);
     unuploaded.set("name", name);
     unuploaded.set("desc", desc);
@@ -76,6 +79,7 @@ export default function Settings() {
     unuploaded.set("passkey2", md5(password + "+" + md5(username)));
     unuploaded.save().then(() => {
       message.success("保存成功！");
+      publish("updateSettings");
       navigate("/home");
     });
   };
@@ -126,17 +130,18 @@ export default function Settings() {
       <InfoCard>
         <h3>公告板</h3>
         <OptionCard>
-          <Space direction="vertical">
-            公告信息：
-            <Input.TextArea
-              value={bulletin}
-              style={{ width: "100%" }}
-              onChange={(e) => setBulletin(e.currentTarget.value)}
-              placeholder="写些什么吧……"
-            />
-          </Space>
+          <Space direction="vertical">公告信息：</Space>
         </OptionCard>
       </InfoCard>
+      <MdEditor
+        value={bulletin}
+        onChange={(e) => setBulletin(e)}
+        placeholder="写些什么吧……"
+        style={{
+          marginTop: "30px",
+          border: 0,
+        }}
+      />
       <InfoCard>
         <h3>博客配置</h3>
         <OptionCard>

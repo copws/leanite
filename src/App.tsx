@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AV from "leancloud-storage";
-import {
-  Col,
-  Layout,
-  Row,
-  Menu,
-  Affix,
-  Button,
-  Space,
-  Card,
-  Avatar,
-  Divider,
-} from "antd";
+import { Col, Layout, Row, Menu, Button, Space, Card, Avatar } from "antd";
 import {
   TagsOutlined,
   ProfileOutlined,
@@ -21,12 +10,18 @@ import {
   SettingOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { init, q2o, type BlogMeta } from "./lib";
+import { init, q2o } from "./lib";
 import InfoCard from "./components/InfoCard";
-import { Link, useLocation, useNavigate, useRoutes, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useRoutes,
+  useSearchParams,
+} from "react-router-dom";
 import routes from "./routes";
 import { subscribe, unsubscribe, publish } from "pubsub-js";
-import { MdCatalog } from "md-editor-rt";
+import { MdPreview } from "md-editor-rt";
 
 const { Header, Footer, Content } = Layout;
 
@@ -109,28 +104,33 @@ function App() {
   });
 
   function updateBlogMeta() {
-    new AV.Query("BlogMeta").find().then((res) => {
-      blogMeta = res.map((q) => q2o(q));
-      localStorage.setItem(
-        "blogMeta",
-        JSON.stringify(blogMeta.map((o) => o.toFullJSON()))
-      );
-      localStorage.setItem(
-        "blogMetaOriginal",
-        JSON.stringify(blogMeta.map((o) => o.toFullJSON()))
-      );
-    });
+    new AV.Query("BlogMeta")
+      .descending("createdAt")
+      .find()
+      .then((res) => {
+        blogMeta = res.map((q) => q2o(q));
+        localStorage.setItem(
+          "blogMeta",
+          JSON.stringify(blogMeta.map((o) => o.toFullJSON()))
+        );
+        localStorage.setItem(
+          "blogMetaOriginal",
+          JSON.stringify(blogMeta.map((o) => o.toFullJSON()))
+        );
+      });
   }
   function updateTags() {
-    new AV.Query("Tags").find().then((res) => {
-      tags = res.map((q) => q2o(q));
-      localStorage.setItem("tags", JSON.stringify(tags));
-      localStorage.setItem("tagsOriginal", JSON.stringify(tags));
-    });
+    new AV.Query("Tags")
+      .descending("createdAt")
+      .find()
+      .then((res) => {
+        tags = res.map((q) => q2o(q));
+        localStorage.setItem("tags", JSON.stringify(tags));
+        localStorage.setItem("tagsOriginal", JSON.stringify(tags));
+      });
   }
-  useEffect(() => {
-    updateBlogMeta();
-    setTimeout(updateTags, 500);
+
+  function updateSettings() {
     new AV.Query("Settings")
       .equalTo("owner", "admin")
       .find()
@@ -143,17 +143,33 @@ function App() {
         setSettings(settings);
         navigate(location.pathname + location.search);
       });
+  }
+  useEffect(() => {
+    updateBlogMeta();
+    setTimeout(updateTags, 500);
+    subscribe("updateSettings", updateSettings);
     subscribe("auth", () => {
       authenticated = true;
       navigate("/adminHome");
     });
     subscribe("isAuthed", () => publish("setAuth", authenticated));
+
+    subscribe("openSidebar", () => setShowSidebar(true));
+    subscribe("closeSidebar", () => setShowSidebar(false));
+
+    updateSettings();
     return () => {
       unsubscribe("auth");
+      unsubscribe("isAuthed");
+      unsubscribe("openSidebar");
+      unsubscribe("closeSidebar");
     };
   }, []);
+
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [useAdminMenu, setUseAdminMenu] = useState<boolean>(false);
+  const [blogContent, setBlogContent] = useState<AV.Object | null>(null);
+
   useEffect(() => {
     if (
       location.pathname.includes("/adminHome") ||
@@ -161,12 +177,10 @@ function App() {
       location.pathname.includes("/settings")
     ) {
       setUseAdminMenu(true);
-      if (location.pathname.includes("/modifyArticle"))
-        setSelectedKeys(["6"]);
+      if (location.pathname.includes("/modifyArticle")) setSelectedKeys(["6"]);
       else if (location.pathname.includes("/modifyTags"))
         setSelectedKeys(["7"]);
-      else if (location.pathname.includes("/settings"))
-        setSelectedKeys(["8"]);
+      else if (location.pathname.includes("/settings")) setSelectedKeys(["8"]);
       else setSelectedKeys(["5"]);
     } else {
       setUseAdminMenu(false);
@@ -182,14 +196,13 @@ function App() {
         } else setSelectedKeys(["2"]);
       } else {
         if (location.pathname.includes("/tag")) setSelectedKeys(["2"]);
-        else if (location.pathname.includes("/article"))
-          setSelectedKeys(["3"]);
+        else if (location.pathname.includes("/article")) setSelectedKeys(["3"]);
         else setSelectedKeys(["1"]);
       }
     }
   }, [location]);
 
-  let [blogContent, setBlogContent] = useState<AV.Object>();
+  const [showSidebar, setShowSidebar] = useState(true);
 
   return (
     <Layout
@@ -208,7 +221,6 @@ function App() {
         <Space style={{ float: "right" }}>
           {useAdminMenu ? (
             <Button
-              danger
               type="primary"
               onClick={() => {
                 authenticated = false;
@@ -218,10 +230,7 @@ function App() {
               退出登录
             </Button>
           ) : (
-            <Button
-              type="primary"
-              onClick={() => navigate("/authentication")}
-            >
+            <Button type="primary" onClick={() => navigate("/authentication")}>
               控制台
             </Button>
           )}
@@ -230,54 +239,65 @@ function App() {
       <Content>
         <Row>
           <Col span={2} />
-          <Col span={12}>{route}</Col>
-          <Col span={1} />
-          <Col span={7}>
-            <InfoCard>
-              <h3>公告</h3>
-              <div style={{ textAlign: "center" }}>{settings.bulletin}</div>
-            </InfoCard>
-            <Card
-              style={{
-                marginTop: "30px",
-                borderRadius: "7px",
-                boxShadow: "0 0 40px 0px rgba(0,0,0,0.04)",
-                width: "100%",
-              }}
-            >
-              <Card.Meta
-                avatar={<Avatar src={settings.avatarURL} />}
-                title={settings.name}
-                description={settings.desc}
-              />
-            </Card>
-            <InfoCard>
-              {useAdminMenu ? (
-                <Menu
-                  mode="inline"
-                  theme="light"
-                  items={adminItems}
-                  defaultSelectedKeys={["5"]}
-                  selectedKeys={selectedKeys}
-                  selectable={false}
-                />
+          <Col span={showSidebar ? 12 : 20}>{route}</Col>
+          <Col span={showSidebar ? 1 : 2} />
+          {showSidebar ? (
+            <Col span={7}>
+              {!useAdminMenu ? (
+                <>
+                  <InfoCard>
+                    <div style={{ paddingLeft: "20px", paddingRight: "20px" }}>
+                      <MdPreview value={"#### 公告\n\n" + settings.bulletin} />
+                    </div>
+                  </InfoCard>
+                  <Card
+                    style={{
+                      marginTop: "30px",
+                      borderRadius: "7px",
+                      boxShadow: "0 0 40px 0px rgba(0,0,0,0.04)",
+                      width: "100%",
+                    }}
+                  >
+                    <Card.Meta
+                      avatar={<Avatar src={settings.avatarURL} />}
+                      title={settings.name}
+                      description={settings.desc}
+                    />
+                  </Card>
+                </>
               ) : (
-                <Menu
-                  mode="inline"
-                  theme="light"
-                  items={items}
-                  defaultSelectedKeys={["1"]}
-                  selectedKeys={selectedKeys}
-                  selectable={false}
-                />
+                <></>
               )}
-            </InfoCard>
-            <div
-              style={{ marginTop: "30px", width: "100%", color: "lightgrey" }}
-            >
-              Leanite Blog, 版本 0.1.2
-            </div>
-          </Col>
+              <InfoCard>
+                {useAdminMenu ? (
+                  <Menu
+                    mode="inline"
+                    theme="light"
+                    items={adminItems}
+                    defaultSelectedKeys={["5"]}
+                    selectedKeys={selectedKeys}
+                    selectable={false}
+                  />
+                ) : (
+                  <Menu
+                    mode="inline"
+                    theme="light"
+                    items={items}
+                    defaultSelectedKeys={["1"]}
+                    selectedKeys={selectedKeys}
+                    selectable={false}
+                  />
+                )}
+              </InfoCard>
+              <div
+                style={{ marginTop: "30px", width: "100%", color: "lightgrey" }}
+              >
+                Leanite Blog, 版本 0.1.3
+              </div>
+            </Col>
+          ) : (
+            <></>
+          )}
         </Row>
       </Content>
       <Footer style={{ backgroundColor: "rgba(0,0,0,0)" }} />

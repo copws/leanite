@@ -55,6 +55,7 @@ export interface BlogMeta {
   reader: number;
   tags: string[];
   objectId: string;
+  isDraft: boolean;
 }
 
 export interface Tag {
@@ -66,11 +67,9 @@ export interface Tag {
 }
 
 export function arrEqual(m1: string[], m2: string[]) {
+  if (m1.length !== m2.length) return false;
   for (let i in m1) {
-    const element = m1[i];
-    if (!m2.find((m) => m === element)) {
-      return false;
-    }
+    if (m1[i] !== m2[i]) return false;
   }
   return true;
 }

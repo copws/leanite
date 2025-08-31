@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, App as AntdApp } from "antd";
 import AV from "leancloud-storage";
 import { LEANCLOUD_SERVER_URL, LEANCLOUD_APPID, LEANCLOUD_APPKEY } from "./lib";
 
@@ -19,6 +19,9 @@ root.render(
   <React.StrictMode>
     <ConfigProvider
       theme={{
+        token: {
+          colorPrimary: "#80cbc4",
+        },
         components: {
           Layout: {
             headerBg: "white",
@@ -27,7 +30,9 @@ root.render(
       }}
     >
       <BrowserRouter basename="/leanite/">
-        <App />
+        <AntdApp>
+          <App />
+        </AntdApp>
       </BrowserRouter>
     </ConfigProvider>
   </React.StrictMode>

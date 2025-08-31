@@ -1,4 +1,4 @@
-import { message, Button } from "antd";
+import { App, Button } from "antd";
 import { publish, subscribe, unsubscribe } from "pubsub-js";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { type Tag, type BlogMeta, arrEqual } from "../../lib";
 
 let verified = false;
 export default function AdminHome() {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   useEffect(() => {
     subscribe("setAuth", (_, data) => {
@@ -27,6 +28,7 @@ export default function AdminHome() {
   }, []);
 
   const upload = () => {
+    // 第一步：从 LocalStorage 里拿现在的 meta、tag 数据和原始的数据
     const tags: Tag[] = JSON.parse(localStorage.getItem("tags") as string);
     const blogMeta: BlogMeta[] = JSON.parse(
       localStorage.getItem("blogMeta") as string
@@ -37,20 +39,29 @@ export default function AdminHome() {
     let blogMetaOriginal: BlogMeta[] = JSON.parse(
       localStorage.getItem("blogMetaOriginal") as string
     );
+    // 未上传的 meta、tags
     const unmodifiedTags: AV.Object[] = [];
     const unmodifiedMetas: AV.Object[] = [];
     console.log(tags, blogMeta, tagsOriginal, blogMetaOriginal);
+
+    // 第二步：找出所有已经更改的 Meta
     for (let i in blogMeta) {
       const meta = blogMeta[i];
       if (meta.objectId.length <= 0) {
-        console.log("This meta hasn't created yet, " + meta.title, meta.id);
+        // This meta hasn't been created yet
+        console.log(
+          "This meta hasn't been created yet, " + meta.title,
+          meta.id
+        );
         const newMeta = new AV.Object("BlogMeta");
         newMeta.set("title", meta.title);
         newMeta.set("reader", 1);
         newMeta.set("tags", meta.tags);
         newMeta.set("id", meta.id);
+        newMeta.set("isDraft", meta.isDraft);
         unmodifiedMetas.push(newMeta);
       } else {
+        // 修改过的 meta
         const original = blogMetaOriginal.find((om) => om.id === meta.id);
         blogMetaOriginal = blogMetaOriginal.filter((om) => om.id !== meta.id);
         if (!original) continue;
@@ -76,16 +87,34 @@ export default function AdminHome() {
             );
           modifiedMeta.set("tags", meta.tags);
         }
+        if (original.isDraft !== meta.isDraft) {
+          if (!modifiedMeta)
+            modifiedMeta = AV.Object.createWithoutData(
+              "BlogMeta",
+              original.objectId
+            );
+          modifiedMeta.set("isDraft", meta.isDraft);
+        }
         if (modifiedMeta) {
           unmodifiedMetas.push(modifiedMeta);
         }
       }
     }
 
+    // 第三步：Tags
     for (let i in tags) {
       const tag = tags[i];
+      // 按照创建时间降序排序
+      tag.ids = blogMeta
+        .filter((meta) => tag.ids.includes(meta.id))
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        .map((meta) => meta.id);
       if (tag.objectId.length <= 0) {
-        console.log("This tag hasn't created yet, " + tag.name);
+        console.log(tag);
+        console.log("This tag hasn't been created yet, " + tag.name);
         const newTag = new AV.Object("Tags");
         newTag.set("name", tag.name);
         newTag.set("ids", tag.ids);
@@ -99,6 +128,7 @@ export default function AdminHome() {
         );
         if (!original) continue;
         let modifiedTag: AV.Object | undefined = undefined;
+        console.log("original: ", original);
         if (original.name !== tag.name) {
           modifiedTag = AV.Object.createWithoutData("Tags", original.objectId);
           modifiedTag.set("name", tag.name);
@@ -106,7 +136,7 @@ export default function AdminHome() {
         if (!arrEqual(original.ids, tag.ids)) {
           if (!modifiedTag)
             modifiedTag = AV.Object.createWithoutData(
-              "tags",
+              "Tags",
               original.objectId
             );
           modifiedTag.set("ids", tag.ids);
@@ -117,6 +147,7 @@ export default function AdminHome() {
       }
     }
 
+    // 第四步：上传
     console.log(
       unmodifiedMetas,
       unmodifiedTags,
@@ -128,14 +159,17 @@ export default function AdminHome() {
       unmodifiedTags.length <= 0 &&
       tagsOriginal.length <= 0 &&
       blogMetaOriginal.length <= 0
-    )
+    ) {
       console.log("everything is up-to-date");
-    else {
-      AV.Object.saveAll(unmodifiedTags).then(() =>
-        console.log("tag 上传成功！")
+      message.info("当前没有需要上传的内容");
+    } else {
+      AV.Object.saveAll(unmodifiedTags).then(
+        () => console.log("tag 上传成功！"),
+        (err) => console.log("tag 上传失败，", err)
       );
-      AV.Object.saveAll(unmodifiedMetas).then(() =>
-        console.log("meta 上传成功！")
+      AV.Object.saveAll(unmodifiedMetas).then(
+        () => console.log("meta 上传成功！"),
+        (err) => console.log("meta 上传失败", err)
       );
       for (let i in tagsOriginal)
         AV.Object.createWithoutData("Tags", tagsOriginal[i].objectId).destroy();
@@ -146,6 +180,7 @@ export default function AdminHome() {
         ).destroy();
       localStorage.setItem("blogMetaOriginal", JSON.stringify(blogMeta));
       localStorage.setItem("tagsOriginal", JSON.stringify(tags));
+      message.success("上传成功");
     }
   };
   return (

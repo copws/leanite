@@ -1,6 +1,6 @@
 import React, { useEffect, useState, type MouseEvent } from "react";
 import {
-  message,
+  App,
   List,
   Button,
   Input,
@@ -8,6 +8,8 @@ import {
   Checkbox,
   Space,
   Modal,
+  Divider,
+  Tag as AntdTag,
 } from "antd";
 import { subscribe, publish, unsubscribe } from "pubsub-js";
 import InfoCard from "../../components/InfoCard";
@@ -16,6 +18,7 @@ import { type BlogMeta, type Tag } from "../../lib";
 
 let verified = false;
 export default function ModifyTags() {
+  const { message } = App.useApp();
   let [tags, _setTags] = useState<Tag[]>([]);
   const setTags = (tgs: Tag[]) => {
     localStorage.setItem("tags", JSON.stringify(tgs));
@@ -96,6 +99,36 @@ export default function ModifyTags() {
   // modifyArticlesInOneTag
   let [isModifying, setIsModifying] = useState<boolean>(false);
   let [checked, setChecked] = useState<string[]>([]);
+
+  const handleModifyArticlesDone = () => {
+    console.log(currentTag);
+    //handleFinish
+    if (currentTag.ids !== checked) {
+      for (let i in checked) {
+        const item = checked[i];
+        const index = blogMeta.findIndex((o) => o.id === item);
+        if (
+          !currentTag?.ids.includes(item) &&
+          !blogMeta[index].tags.includes(currentTag.name)
+        ) {
+          blogMeta[index].tags.push(currentTag.name);
+        } else currentTag.ids = currentTag.ids.filter((id) => id !== item);
+      }
+      for (let i in currentTag.ids) {
+        const item = currentTag.ids[i];
+        const index = blogMeta.findIndex((o) => o.id === item);
+        blogMeta[index].tags = blogMeta[index].tags.filter(
+          (tag) => tag !== currentTag?.name
+        );
+      }
+      setBlogMeta(blogMeta);
+      tags[tags.findIndex((o) => o.name === name)].ids = checked;
+      setTags(tags);
+    }
+    setIsModifying(false);
+    navigate("/modifyTags?name=" + name);
+  };
+
   const currentTag = tags?.find((o) => o.name === name) as Tag;
   return (
     <div>
@@ -128,10 +161,17 @@ export default function ModifyTags() {
               }
               dataSource={currentTag?.ids}
               renderItem={(item: string) => {
+                const meta = blogMeta.find((m) => m.id === item) as BlogMeta;
                 return (
                   <List.Item>
                     <Link to={"/article?id=" + item}>
-                      {blogMeta.find((m) => m.id === item)?.title}
+                      {meta.title}
+                      <Divider type="vertical" />
+                      {meta.isDraft ? (
+                        <AntdTag color="orange">草稿</AntdTag>
+                      ) : (
+                        <AntdTag color="green">已发布</AntdTag>
+                      )}
                     </Link>
                   </List.Item>
                 );
@@ -156,43 +196,19 @@ export default function ModifyTags() {
                 }}
                 header={<div>{name}</div>}
                 footer={
-                  <Button
-                    onClick={() => {
-                      console.log(currentTag);
-                      //handleFinish
-                      if (currentTag.ids === checked) return;
-                      for (let i in checked) {
-                        const item = checked[i];
-                        const index = blogMeta.findIndex((o) => o.id === item);
-                        if (
-                          !currentTag?.ids.includes(item) &&
-                          !blogMeta[index].tags.includes(currentTag.name)
-                        ) {
-                          blogMeta[index].tags.push(currentTag.name);
-                        } else
-                          currentTag.ids = currentTag.ids.filter(
-                            (id) => id !== item
-                          );
-                      }
-                      for (let i in currentTag.ids) {
-                        const item = currentTag.ids[i];
-                        const index = blogMeta.findIndex((o) => o.id === item);
-                        blogMeta[index].tags = blogMeta[index].tags.filter(
-                          (tag) => tag !== currentTag?.name
-                        );
-                      }
-                      setBlogMeta(blogMeta);
-                      tags[tags.findIndex((o) => o.name === name)].ids =
-                        checked;
-                      setTags(tags);
-                      setIsModifying(false);
-                      navigate("/modifyTags?name=" + name);
-                    }}
-                    type="primary"
-                    style={{ float: "right" }}
-                  >
-                    完成
-                  </Button>
+                  <Space direction="horizontal" style={{ float: "right" }}>
+                    <Button onClick={handleModifyArticlesDone} type="primary">
+                      完成
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsModifying(false);
+                        navigate("/modifyTags?name=" + name);
+                      }}
+                    >
+                      取消
+                    </Button>
+                  </Space>
                 }
                 dataSource={blogMeta}
                 renderItem={(meta) => (
@@ -204,6 +220,7 @@ export default function ModifyTags() {
             </Checkbox.Group>
           )
         ) : (
+          // 标签总览
           <List
             header={<div>标签总览</div>}
             pagination={{
@@ -290,6 +307,7 @@ export default function ModifyTags() {
           />
         )}
       </InfoCard>
+      {/* 创建新标签的 Modal */}
       <Modal
         open={isCreating}
         title="创建新标签"

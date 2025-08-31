@@ -9,13 +9,13 @@ import AV from "leancloud-storage";
 import { q2o, type BlogMeta } from "../lib";
 import React, { useEffect, useState } from "react";
 import InfoCard from "../components/InfoCard";
-import { Space, Divider, Tag, Breadcrumb } from "antd";
+import { Space, Divider, Tag, Breadcrumb, App } from "antd";
 import MetaView from "../components/MetaView";
 import { HomeOutlined } from "@ant-design/icons";
 import { MdPreview } from "md-editor-rt";
 
-let prevId = "";
 const Article = () => {
+  const { message } = App.useApp();
   const location = useLocation();
   const [search] = useSearchParams();
   let [blogContent, setBlogContent] = useState<AV.Object>();
@@ -27,7 +27,10 @@ const Article = () => {
     blogMeta = JSON.parse(localStorage.getItem("blogMeta") as string);
     setBlogMeta(blogMeta);
     if (id) {
-      prevId = id;
+      if (blogMeta.find((meta) => meta.id === id)?.isDraft) {
+        message.error("文章不存在");
+        navigate("/article");
+      }
       new AV.Query("BlogContent")
         .equalTo("id", id)
         .find()
@@ -40,14 +43,14 @@ const Article = () => {
         .then((res) =>
           setTimeout(() => q2o(res[0]).increment("reader", 1).save(), 5000)
         );
-    }
-    if (!id && (articles.length <= 0 || articles[0].length <= 0)) {
+    } else {
       articles = [];
       let y = Infinity;
       for (let i in blogMeta) {
         const meta = blogMeta[i];
+        if (meta.isDraft) continue;
         const y2 = new Date(meta.createdAt).getFullYear();
-        if (y2 < y) {
+        if (y2 !== y) {
           articles.push([meta]);
           y = y2;
         } else {
@@ -55,7 +58,6 @@ const Article = () => {
         }
       }
       setArticles(articles);
-      navigate("/article");
     }
   }, [location]);
   let metaNow: BlogMeta = {
@@ -66,6 +68,7 @@ const Article = () => {
     reader: 1,
     tags: [],
     updatedAt: "",
+    isDraft: false,
   };
   if (id && blogMeta.length > 0) {
     metaNow = blogMeta.find((meta) => meta.id === id) as BlogMeta;
