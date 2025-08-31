@@ -130,7 +130,7 @@ export default function Settings() {
       <InfoCard>
         <h3>公告板</h3>
         <OptionCard>
-          <Space direction="vertical">公告信息：</Space>
+          <Space direction="vertical">公告信息（支持 MarkDown 语法）：</Space>
         </OptionCard>
       </InfoCard>
       <MdEditor
