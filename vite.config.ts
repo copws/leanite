@@ -35,7 +35,12 @@ export default defineConfig({
         },
         manualChunks(id: any) {
           if (id.includes("node_modules")) {
-            return "vendor";
+            return (
+              id
+                .toString()
+                .match(/\/node_modules\/(?!.pnpm)(?<moduleName>[^\/]*)\//)
+                ?.groups!.moduleName ?? "vender"
+            );
           }
         },
         // manualChunks(id) {
