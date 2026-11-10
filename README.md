@@ -1,5 +1,7 @@
 # Leanite
 
+> 由于 LeanCloud 将在 2027.1 停服，该项目归档。作者又整了个[静态版](https://github.com/copws/leanite-static)，设计语言和 Leanite 的基本一样，欢迎参观。
+
 基于 LeanCloud 和 React 的动态博客系统。去我们的 [Leanite 开发日志](https://copws.github.io/leanite) 预览博客效果。
 
 核心组件：
